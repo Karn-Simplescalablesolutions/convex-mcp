@@ -4,7 +4,7 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "start": "convex mcp start"
+    "start": "convex mcp start --log-level debug"
   },
   "dependencies": {
     "convex": "latest"

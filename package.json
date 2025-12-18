@@ -7,6 +7,6 @@
     "supergateway": "latest"
   },
   "scripts": {
-    "start": "supergateway --stdio \"CONVEX_DEPLOY_KEY='prod:first-pika-815|eyJ2MiI6Ijg2ZDU1MmRiYTJhOTQ5OTRhODZlZmRmZTJlOGI5NDkyIn0=' npx convex mcp start --deployment first-pika-815\" --port 8080 --key test"
+    "start": "supergateway --stdio \"npx convex mcp start\" --port 8080 --key test"
   }
 }

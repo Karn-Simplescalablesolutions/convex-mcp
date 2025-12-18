@@ -50,7 +50,7 @@ export const getByGhlId = query({
     },
 });
 
-// Update activity
+// Update activity (requires internal ID)
 export const update = mutation({
     args: {
         id: v.id("activities"),
@@ -61,6 +61,33 @@ export const update = mutation({
         const { id, ...updates } = args;
         await ctx.db.patch(id, updates);
         return id;
+    },
+});
+
+// Patch activity by GHL ID
+export const patch = mutation({
+    args: {
+        ghlId: v.string(),
+        updates: v.object({
+            title: v.optional(v.string()),
+            updatedAt: v.string(),
+        }),
+    },
+    handler: async (ctx, args) => {
+        const { ghlId, updates } = args;
+
+        // Find the document by ghlId
+        const existing = await ctx.db
+            .query("activities")
+            .withIndex("by_ghlId", (q) => q.eq("ghlId", ghlId))
+            .first();
+
+        if (!existing) {
+            throw new Error(`Activity with ghlId ${ghlId} not found`);
+        }
+
+        await ctx.db.patch(existing._id, updates);
+        return existing._id;
     },
 });
 

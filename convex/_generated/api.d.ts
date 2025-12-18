@@ -10,6 +10,7 @@
 
 import type * as activities from "../activities.js";
 import type * as test from "../test.js";
+import type * as webhooks_ghlWebhook from "../webhooks/ghlWebhook.js";
 
 import type {
   ApiFromModules,
@@ -20,6 +21,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   activities: typeof activities;
   test: typeof test;
+  "webhooks/ghlWebhook": typeof webhooks_ghlWebhook;
 }>;
 
 /**

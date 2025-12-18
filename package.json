@@ -2,11 +2,11 @@
   "name": "my-convex-db",
   "version": "1.0.0",
   "private": true,
-  "type": "commonjs",
-  "scripts": {
-    "start": "convex mcp start --log-level debug"
-  },
   "dependencies": {
-    "convex": "latest"
+    "convex": "latest",
+    "supergateway": "latest"
+  },
+  "scripts": {
+    "start": "supergateway --stdio \"npx convex mcp start\" --port 8080 --key test"
   }
 }

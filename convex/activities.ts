@@ -65,14 +65,17 @@ export const update = mutation({
 });
 
 // Patch activity by GHL ID
+// Patch activity by GHL ID
 export const patch = mutation({
     args: {
         ghlId: v.string(),
-        title: v.optional(v.string()),
-        updatedAt: v.string(),
+        updates: v.object({
+            title: v.optional(v.string()),
+            updatedAt: v.string(),
+        }),
     },
     handler: async (ctx, args) => {
-        const { ghlId, ...updates } = args;
+        const { ghlId, updates } = args;
 
         // Find the document by ghlId
         const existing = await ctx.db

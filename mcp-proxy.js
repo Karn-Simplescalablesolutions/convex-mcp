@@ -40,6 +40,257 @@ rl.on('line', (line) => {
             return;
         }
 
+        // Intercept 'tables' tool call
+        if (msg.method === 'tools/call' && msg.params && msg.params.name === 'tables') {
+            const cmd = `npx convex data`;
+
+            exec(cmd, (error, stdout, stderr) => {
+                let resultText = stdout;
+                if (error) {
+                    resultText = `Error: ${error.message}\nStderr: ${stderr}`;
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }],
+                            isError: true
+                        }
+                    }) + '\n');
+                } else {
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }]
+                        }
+                    }) + '\n');
+                }
+            });
+            return;
+        }
+
+        // Intercept 'data' tool call
+        if (msg.method === 'tools/call' && msg.params && msg.params.name === 'data') {
+            const args = msg.params.arguments;
+            const tableName = args.tableName || '';
+            const limit = args.limit || 100;
+            const order = args.order || 'desc';
+
+            const cmd = `npx convex data ${tableName} --limit ${limit} --order ${order} --format json`;
+
+            exec(cmd, (error, stdout, stderr) => {
+                let resultText = stdout;
+                if (error) {
+                    resultText = `Error: ${error.message}\nStderr: ${stderr}`;
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }],
+                            isError: true
+                        }
+                    }) + '\n');
+                } else {
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }]
+                        }
+                    }) + '\n');
+                }
+            });
+            return;
+        }
+
+        // Intercept 'functionSpec' tool call
+        if (msg.method === 'tools/call' && msg.params && msg.params.name === 'functionSpec') {
+            const cmd = `npx convex function-spec`;
+
+            exec(cmd, (error, stdout, stderr) => {
+                let resultText = stdout;
+                if (error) {
+                    resultText = `Error: ${error.message}\nStderr: ${stderr}`;
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }],
+                            isError: true
+                        }
+                    }) + '\n');
+                } else {
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }]
+                        }
+                    }) + '\n');
+                }
+            });
+            return;
+        }
+
+        // Intercept 'logs' tool call
+        if (msg.method === 'tools/call' && msg.params && msg.params.name === 'logs') {
+            const args = msg.params.arguments;
+            const limit = args.limit || 100;
+
+            // Note: convex logs doesn't have a --limit flag, but we can use head
+            const cmd = `npx convex logs --json | head -n ${limit}`;
+
+            exec(cmd, (error, stdout, stderr) => {
+                let resultText = stdout;
+                if (error) {
+                    resultText = `Error: ${error.message}\nStderr: ${stderr}`;
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }],
+                            isError: true
+                        }
+                    }) + '\n');
+                } else {
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }]
+                        }
+                    }) + '\n');
+                }
+            });
+            return;
+        }
+
+        // Intercept 'envList' tool call
+        if (msg.method === 'tools/call' && msg.params && msg.params.name === 'envList') {
+            const cmd = `npx convex env list`;
+
+            exec(cmd, (error, stdout, stderr) => {
+                let resultText = stdout;
+                if (error) {
+                    resultText = `Error: ${error.message}\nStderr: ${stderr}`;
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }],
+                            isError: true
+                        }
+                    }) + '\n');
+                } else {
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }]
+                        }
+                    }) + '\n');
+                }
+            });
+            return;
+        }
+
+        // Intercept 'envGet' tool call
+        if (msg.method === 'tools/call' && msg.params && msg.params.name === 'envGet') {
+            const args = msg.params.arguments;
+            const varName = args.name || '';
+
+            const cmd = `npx convex env get ${varName}`;
+
+            exec(cmd, (error, stdout, stderr) => {
+                let resultText = stdout;
+                if (error) {
+                    resultText = `Error: ${error.message}\nStderr: ${stderr}`;
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }],
+                            isError: true
+                        }
+                    }) + '\n');
+                } else {
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }]
+                        }
+                    }) + '\n');
+                }
+            });
+            return;
+        }
+
+        // Intercept 'envSet' tool call
+        if (msg.method === 'tools/call' && msg.params && msg.params.name === 'envSet') {
+            const args = msg.params.arguments;
+            const varName = args.name || '';
+            const varValue = args.value || '';
+
+            const cmd = `npx convex env set ${varName} "${varValue}"`;
+
+            exec(cmd, (error, stdout, stderr) => {
+                let resultText = stdout;
+                if (error) {
+                    resultText = `Error: ${error.message}\nStderr: ${stderr}`;
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }],
+                            isError: true
+                        }
+                    }) + '\n');
+                } else {
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }]
+                        }
+                    }) + '\n');
+                }
+            });
+            return;
+        }
+
+        // Intercept 'envRemove' tool call
+        if (msg.method === 'tools/call' && msg.params && msg.params.name === 'envRemove') {
+            const args = msg.params.arguments;
+            const varName = args.name || '';
+
+            const cmd = `npx convex env remove ${varName}`;
+
+            exec(cmd, (error, stdout, stderr) => {
+                let resultText = stdout;
+                if (error) {
+                    resultText = `Error: ${error.message}\nStderr: ${stderr}`;
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }],
+                            isError: true
+                        }
+                    }) + '\n');
+                } else {
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }]
+                        }
+                    }) + '\n');
+                }
+            });
+            return;
+        }
+
         // Intercept 'run' tool call
         if (msg.method === 'tools/call' && msg.params && msg.params.name === 'run') {
             const args = msg.params.arguments;

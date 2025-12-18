@@ -7,6 +7,6 @@
     "supergateway": "latest"
   },
   "scripts": {
-    "start": "supergateway --stdio \"npx convex mcp start\" --port 8080 --key test"
+    "start": "supergateway --stdio \"npx convex mcp start --project-dir .\" --port 8080 --key test"
   }
 }

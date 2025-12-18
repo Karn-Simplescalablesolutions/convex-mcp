@@ -4,8 +4,10 @@ import { mutation } from "../_generated/server";
 export const updateRecord = mutation({
     args: {
         ghlId: v.string(),
+        tableName: v.optional(v.string()), // Accept tableName even if we ignore it (for now)
         updates: v.object({
             title: v.optional(v.string()),
+            createdAt: v.optional(v.string()), // Accept createdAt
             updatedAt: v.string(),
         }),
     },
@@ -27,7 +29,7 @@ export const updateRecord = mutation({
             const newId = await ctx.db.insert("activities", {
                 ghlId: ghlId,
                 title: updates.title || "Untitled Activity",
-                createdAt: updates.updatedAt,
+                createdAt: updates.createdAt || updates.updatedAt,
                 updatedAt: updates.updatedAt,
             });
             return { status: "created", id: newId };

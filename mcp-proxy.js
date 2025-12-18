@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const readline = require('readline');
 
-// The real command to run
-// We add --project-dir . to ensure context is correct
-const child = spawn('npx', ['convex', 'mcp', 'start', '--project-dir', '.'], {
+// Start the MCP server without forcing project-dir
+// This allows it to run in "stateless" mode where it provides the tool definitions (list, run, etc.)
+// but we intercept the actual execution that requires auth/context.
+const child = spawn('npx', ['convex', 'mcp', 'start'], {
     stdio: ['pipe', 'pipe', process.stderr]
 });
 
@@ -17,24 +18,73 @@ rl.on('line', (line) => {
     try {
         const msg = JSON.parse(line);
 
-        // Filter out access_token from tools/call
-        // This fixes the issue where n8n/LangChain sends a GHL token that confuses Convex
-        if (msg.method === 'tools/call' && msg.params && msg.params.arguments) {
-            if (msg.params.arguments.access_token) {
-                // console.error('DEBUG: Sanitizing access_token from ' + msg.params.name);
-                delete msg.params.arguments.access_token;
-            }
+        // Intercept 'status' tool call
+        if (msg.method === 'tools/call' && msg.params && msg.params.name === 'status') {
+            const mockResponse = {
+                jsonrpc: "2.0",
+                id: msg.id,
+                result: {
+                    content: [{
+                        type: "text",
+                        text: JSON.stringify({
+                            availableDeployments: [{
+                                kind: "prod",
+                                deploymentSelector: "custom:prod",
+                                url: process.env.CONVEX_URL || "https://deployed.convex.cloud",
+                            }]
+                        })
+                    }]
+                }
+            };
+            process.stdout.write(JSON.stringify(mockResponse) + '\n');
+            return;
         }
 
+        // Intercept 'run' tool call
+        if (msg.method === 'tools/call' && msg.params && msg.params.name === 'run') {
+            const args = msg.params.arguments;
+            const funcName = args.functionName;
+            const funcArgs = args.args || "{}";
+
+            // Execute via npx convex run which handles CONVEX_DEPLOY_KEY correctly
+            // Args are passed as a positional parameter, not a flag
+            const cmd = `npx convex run ${funcName} '${funcArgs}'`;
+
+            exec(cmd, (error, stdout, stderr) => {
+                let resultText = stdout;
+                if (error) {
+                    // If execution fails, return error as text (so n8n sees it)
+                    resultText = `Error: ${error.message}\nStderr: ${stderr}`;
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }],
+                            isError: true
+                        }
+                    }) + '\n');
+                } else {
+                    process.stdout.write(JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: msg.id,
+                        result: {
+                            content: [{ type: "text", text: resultText }]
+                        }
+                    }) + '\n');
+                }
+            });
+            return;
+        }
+
+        // Forward everything else to child
         const output = JSON.stringify(msg) + '\n';
         child.stdin.write(output);
     } catch (e) {
-        // Fallback for non-JSON lines
-        child.stdin.write(line + '\n');
+        // console.error("Proxy error:", e);
     }
 });
 
-// Pipe child output back to stdout
+// Pipe child output back to stdout (for initialization, tools/list, etc.)
 child.stdout.on('data', (data) => {
     process.stdout.write(data);
 });
